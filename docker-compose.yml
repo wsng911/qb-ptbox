@@ -1,0 +1,18 @@
+services:
+  qbittorrent:
+    build: .
+    container_name: qb-ptbox
+    restart: unless-stopped
+    environment:
+      - QB_USERNAME=admin
+      - QB_PASSWORD=adminadmin
+      - QB_WEBUI_PORT=8080
+      - QB_INCOMING_PORT=45000
+      - QB_CACHE_SIZE=512
+    ports:
+      - "8080:8080"
+      - "45000:45000"
+      - "45000:45000/udp"
+    volumes:
+      - ./downloads:/app/downloads
+      - ./config:/app/config

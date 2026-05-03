@@ -1,89 +1,72 @@
-[中文Readme](https://github.com/jerry048/Dedicated-Seedbox/blob/main/README-zh.md)
-# !! ALERT
-BBR v3 is currently unavailable
+# qb-ptbox
 
-# Seedbox Installation Script
-## Usage
-`bash <(wget -qO- https://raw.githubusercontent.com/jerry048/Dedicated-Seedbox/main/Install.sh) -u <username> -p <password> -c <Cache Size(unit:MiB)> -q <qBittorrent Version> -l <libtorrent Version> -b -v -r -3 -x -o`
-#### Options
-	1. -u: username 
-	2. -p: password
-	3. -c: Cache size for torrent client
-	4. -q: qBittorrent versions
-	5. -l: libtorrent versions
-	6. -b: Install autobrr
-	7. -v: Install vertex
-	8. -r: Install autoremove-torrents
-	9. -3: Enable BBR V3
-	10.-x: Enable BBRx
-	11. Customize ports
-#### Example
-`bash <(wget -qO- https://raw.githubusercontent.com/jerry048/Dedicated-Seedbox/main/Install.sh) -u jerry048 -p 1LDw39VOgors -c 3072 -q 4.3.9 -l v1.2.19 -b -r -x`
+一个基于 Docker 的 qBittorrent PT 下载盒子，将原始 seedbox 安装脚本的所有步骤容器化，开箱即用，无需手动编译安装。
 
-##### Explanation
-	1. username is jerry048
-	2. password is 1LDw39VOgors 
-	3. Cache size is 3GB
-	4. Install qBittorrent 4.3.9 - libtorrent-v1.2.19
-	5. Install autobrr
-	6. Install autoremove-torrents
-	7. Enable BBRx
-## Supported Platform
-	1. OS
-		1. Debian 10+
-		2. Ubuntu 20.04+
-	
-	2. CPU Architecture
-		1. x86_64
-		2. ARM64
-## Functions
-###### 1. Seedbox Environment
-	1. qBittorrent
-	2. autobrr
-	3. vertex
-	4. autoremove-torrents
-###### 2. System Tunning
-	CPU Optimization
-	Network Optimization
-	Kernel Values
-	Drive Optimization
-	BBRv3 or BBRx
+## 功能特性
 
-### Fine Tunning Note
-- The Cache size should be set to around 1/4 of the machine total available ram. In case you opt for qBittorrent 4.3.x, you need to take account into memory leakage and set it to 1/8. 
+- 🐳 基于 Docker，一条命令启动 qBittorrent
+- ⚙️ 环境变量配置用户名、密码、端口、缓存
+- 💾 数据持久化（下载目录 + 配置目录挂载）
+- 🔄 支持 `autoremove-torrents` 自动删种
+- 📦 使用静态编译二进制，无依赖冲突
 
-- aio_threads default setting is 4 and should be good for HDD. For SSD or even NVMe server, you might consider increase it to 8 or even 16. 
-	- For qBittorrent 4.3.x - 4.6.x you can change it in the advance setting tab. 
-	- For qBittorrent 4.1.x, you can set it in /home/$username/.config/qBittorrent/qBittorrent.conf by adding `Session\AsyncIOThreadsCount=8` under [BitTorrent] section
-		- Please shut down qBittorrent before the editing
-	- For Deluge, you can install [ltconfig](https://github.com/ratanakvlun/deluge-ltconfig/releases/tag/v0.3.1) and edit through the plugins
-		- aio_threads=8
+## 快速开始
 
-- send_buffer_low_watermark, send_buffer_watermark & send_buffer_watermark_factor can be set to a lower value if you are running on a machine with poor I/O.
-	- For qBittorrent 4.3.x you can change it in the advance setting tab. 
-	- For qBittorrent 4.1.x, you can set it in /home/$username/.config/qBittorrent/qBittorrent.conf by adding `Session\SendBufferWatermark=5120`,`Session\SendBufferLowWatermark=1024`and`Session\SendBufferWatermarkFactor=150` under [BitTorrent] section
-		- Please shut down qBittorrent before the editing
-	- For Deluge, you can install [ltconfig](https://github.com/ratanakvlun/deluge-ltconfig/releases/tag/v0.3.1) and edit through the plugins
-		- send_buffer_low_watermark=1048576
-		- send_buffer_watermark=5242880
-		- send_buffer_watermark_factor=150
+### 使用 docker-compose（推荐）
 
-- tick_internal default setting is 100 which can be too high for some weaker CPU. Consider changing it to 250 or 500.
-	- Sadly there is no way to change this setting in qBittorrent
-	- For Deluge, you can install [ltconfig](https://github.com/ratanakvlun/deluge-ltconfig/releases/tag/v0.3.1) and edit through the plugins
-		- tick_interval=250
+```bash
+git clone https://github.com/wsng911/qb-ptbox.git
+cd qb-ptbox
+docker compose up -d
+```
 
-- A little bit more fine tunning notes can also be found in /etc/sysctl.conf
+访问 WebUI：`http://localhost:8080`
+默认账号：`admin` / `adminadmin`
 
-- For file system, I highly recommend using XFS 
+### 使用 docker run
 
-### Credit
-qBittorrent Install - https://github.com/userdocs/qbittorrent-nox-static
+```bash
+docker build -t qb-ptbox .
 
-qBittorrent Password Set - https://github.com/KozakaiAya/libqbpasswd & https://amefs.net/archives/2027.html
+docker run -d \
+  --name qb-ptbox \
+  -p 8080:8080 \
+  -p 45000:45000 \
+  -e QB_USERNAME=admin \
+  -e QB_PASSWORD=adminadmin \
+  -e QB_CACHE_SIZE=1024 \
+  -v $(pwd)/downloads:/app/downloads \
+  -v $(pwd)/config:/app/config \
+  qb-ptbox
+```
 
-Deluge Password Set - https://github.com/amefs/quickbox-lite
+## 环境变量
 
-autoremove-torrents - https://github.com/jerrymakesjelly/autoremove-torrents
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `QB_USERNAME` | `admin` | WebUI 用户名 |
+| `QB_PASSWORD` | `adminadmin` | WebUI 密码 |
+| `QB_WEBUI_PORT` | `8080` | WebUI 端口 |
+| `QB_INCOMING_PORT` | `45000` | BT 监听端口 |
+| `QB_CACHE_SIZE` | `512` | 磁盘缓存（MB），建议设为内存的 1/4 |
 
-BBR Install - https://github.com/KozakaiAya/TCP_BBR
+## 目录结构
+
+```
+qb-ptbox/
+├── Dockerfile          # 镜像构建文件
+├── docker-compose.yml  # 编排配置
+├── entrypoint.sh       # 容器启动脚本
+├── Install.sh          # 原始 seedbox 安装脚本（参考）
+├── downloads/          # 下载目录（运行时自动创建）
+└── config/             # qBittorrent 配置目录（运行时自动创建）
+```
+
+## 缓存建议
+
+- 普通用途：内存的 1/4，如 8GB 内存设 `QB_CACHE_SIZE=2048`
+- qBittorrent 4.3.x 存在内存泄漏，建议设为内存的 1/8
+
+## License
+
+MIT License - Copyright (c) 2025 wsng911
