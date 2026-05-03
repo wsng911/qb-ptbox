@@ -1,18 +1,24 @@
 services:
   qbittorrent:
-    build: .
+    build:
+      context: .
+      args:
+        # 修改这里切换 qBittorrent 版本
+        QB_VERSION: 4.6.7
+        LIBT_VERSION: 2.0.10
     container_name: qb-ptbox
     restart: unless-stopped
     environment:
-      - QB_USERNAME=admin
-      - QB_PASSWORD=adminadmin
-      - QB_WEBUI_PORT=8080
-      - QB_INCOMING_PORT=45000
-      - QB_CACHE_SIZE=512
+      - QB_USERNAME=admin          # WebUI 用户名
+      - QB_WEBUI_PORT=8080         # WebUI 端口
+      - QB_INCOMING_PORT=45000     # BT 监听端口
+      - QB_CACHE_SIZE=512          # 磁盘缓存 MB，建议设为内存的 1/4
     ports:
       - "8080:8080"
       - "45000:45000"
       - "45000:45000/udp"
     volumes:
-      - ./downloads:/app/downloads
-      - ./config:/app/config
+      - ./downloads:/app/downloads  # 下载文件保存目录
+      - ./config:/app/config        # qBittorrent 配置目录
+      # 可选：挂载种子监控目录（放入 .torrent 文件自动添加）
+      # - ./watch:/app/watch
