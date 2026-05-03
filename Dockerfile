@@ -28,10 +28,11 @@ RUN pip3 install --no-cache-dir autoremove-torrents --break-system-packages
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-RUN git init && git add -A && git commit -m "init: qb-ptbox docker image" || true
+RUN git config --global user.email "wsng911@github.com" && \
+    git config --global user.name "wsng911" && \
+    git init && git add -A && git commit -m "init: qb-ptbox docker image"
 
 ENV QB_USERNAME=admin \
-    QB_PASSWORD=adminadmin \
     QB_WEBUI_PORT=8080 \
     QB_INCOMING_PORT=45000 \
     QB_CACHE_SIZE=512
