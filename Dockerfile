@@ -4,8 +4,8 @@ WORKDIR /app
 
 # 可通过 --build-arg 自定义版本
 # 例：docker build --build-arg QB_VERSION=4.3.9 --build-arg LIBT_VERSION=1.2.19 .
-ARG QB_VERSION=4.6.7
-ARG LIBT_VERSION=2.0.10
+ARG QB_VERSION=4.4.5
+ARG LIBT_VERSION=1.2.18
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y \

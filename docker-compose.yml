@@ -4,8 +4,8 @@ services:
       context: .
       args:
         # 修改这里切换 qBittorrent 版本
-        QB_VERSION: 4.6.7
-        LIBT_VERSION: 2.0.10
+        QB_VERSION: 4.4.5
+        LIBT_VERSION: 1.2.18
     container_name: qb-ptbox
     restart: unless-stopped
     environment:
